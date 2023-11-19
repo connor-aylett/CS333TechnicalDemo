@@ -107,23 +107,23 @@ def lloyds_kmeans(data, k, iterations):
     # randomly initialize centroids
 
     centroids = data.sample(n=k).values
-    clusters = [[]*k]
+    # clusters = [[]*k]
+    clusters = [[] for _ in range(k)]  # NEW CODE
 
     for i in range(iterations):
         print("Starting iteration " + str(i))
 
         # calculate distance from each point to all centroids
-        print(len(data))
-        print(range(k))
         distances = [[0]*len(data) for x in range(k)]
-        print("Length of distances: ", len(distances))
-        print("Vertical length of distances", len(distances[0]))
         for centroidindex in range(k):
             print("Centroid index: " + str(centroidindex))
-            currentcentroid = centroids[i]
+            # NEW CODE, centroidindex was i before
+            currentcentroid = centroids[centroidindex]
             for rowindex in range(len(data)):
-                print("Row index: " + str(rowindex))
+                # print("Row index: " + str(rowindex))
                 currentpoint = data.iloc[rowindex]
+                # print("CURRENT CENTROID ", currentcentroid)
+                # print("TYPE OF CURRENT CENTROID ", type(currentcentroid))
                 distances[centroidindex][rowindex] = distance(
                     currentcentroid, currentpoint)
 
@@ -136,19 +136,19 @@ def lloyds_kmeans(data, k, iterations):
             clusters[tempmin].append(data.iloc[rowindex])
 
         # new centroids based on mean of each cluster -- CONNOR
-        for clusterindex in range(k):
-            centroidsnew = meandata(clusters[clusterindex])
+        centroidsnew = [meandata(cluster) for cluster in clusters]
 
         # check if new centroids are same as old ones (convergence)
-        if centroids.equals(centroidsnew):
-            print("Converged after " + i + " iterations")
+        if np.array_equal(centroids, centroidsnew):  # NEW CODE
+            print("Converged after " + str(i) + " iterations")
             break
         centroids = centroidsnew
 
     # calculate distance from each point to final centroids
-    distances = [[]*len(data) for x in range[k]]
+    distances = [[0]*len(data) for x in range(k)]
     for centroidindex in range(k):
-        currentcentroid = centroids[i]
+        # currentcentroid = centroids[i] #Where is i coming from, this is outside of for loop
+        currentcentroid = centroids[centroidindex]
         for rowindex in range(len(data)):
             currentpoint = data.iloc[rowindex]
             distances[centroidindex][rowindex] = distance(
@@ -169,14 +169,12 @@ def lloyds_kmeans(data, k, iterations):
 def meandata(data):
     means_and_categorical_modes = []
     rows = len(data)
-    cols = len(data[0])
-    number_values = ["1", "2", "3", "4", "5"]
+    cols = len(data[0]) if data else 0  # NEW CODE
     for col in range(cols):
         sum = 0
         frequencies = {}
         for row in range(rows):
             # The case for when the data is an integer (139 of the 150 columns)
-            print("TYPE: ", type(data[row][col]))
             if isinstance(data[row][col], str):
                 if data[row][col] in frequencies:
                     frequencies[data[row][col]] += 1
@@ -190,20 +188,21 @@ def meandata(data):
 
         # The case for when the data is an integer (139 of the 150 columns)
         if sum != 0:
-            print("Sum: ", sum, "and Rows: ", rows)
+            # print("Sum: ", sum, "and Rows: ", rows)
             means_and_categorical_modes.append(float(sum) / float(rows))
         # The case for when the data is categorical (11 of the 150 columns)
         else:
             means_and_categorical_modes.append(
                 max(frequencies, key=frequencies.get))
 
-    print("Means method: ")
-    print(means_and_categorical_modes)  # Testing print
+    # print("Means method: ")
+    # print(means_and_categorical_modes)  # Testing print
     return means_and_categorical_modes
 
 
 def distance(user1, user2):
     distance = 0
+    # print("TYPE OF USER1: ", type(user1))
 
     for x in range(len(user1)):
         temp = 0
@@ -252,3 +251,4 @@ testdata = dataset.sample(n=20)
 print(testdata)
 
 resultclusters = lloyds_kmeans(testdata, 3, 25)
+print(resultclusters)
