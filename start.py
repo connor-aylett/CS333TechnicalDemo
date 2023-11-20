@@ -70,21 +70,6 @@ house_breakdown = dataset['House - block of flats'].value_counts()
 #print("House or Block of Flats Value Counts:" + house_breakdown.to_string())
 
 # Mapping of categorical columns to 1-5 number scales
-<<<<<<< HEAD
-smoking_mapping = {'never smoked': 1, 'tried smoking': 2,
-                   'former smoker': 4, 'current smoker': 5}
-
-alcohol_mapping = {'never': 1, 'social drinker': 3, 'drink a lot': 5}
-
-punctuality_mapping = {'i am always on time': 1,
-                       'i am often early': 3, 'i am often running late': 5}
-
-lying_mapping = {'never': 1, 'only to avoid hurting someone': 3,
-                 'sometimes': 4, 'everytime it suits me': 5}
-
-internet_mapping = {'less than an hour a day': 1,
-                    'few hours a day': 3, 'most of the day': 5}
-=======
 smoking_mapping = {'never smoked': 1, 'tried smoking': 2, 'former smoker': 4, 'current smoker': 5}
 
 alcohol_mapping = {'never': 1, 'social drinker': 3, 'drink a lot': 5}
@@ -94,18 +79,12 @@ punctuality_mapping = {'i am always on time': 1, 'i am often early': 3, 'i am of
 lying_mapping = {'never': 1, 'only to avoid hurting someone': 3, 'sometimes': 4, 'everytime it suits me': 5}
 
 internet_mapping = {'less than an hour a day': 1, 'few hours a day': 3, 'most of the day': 5}
->>>>>>> c09117f7f954990e0652cbc5bd513d386de1d513
 
 gender_mapping = {'female': 0, 'male': 1}
 
 handed_mapping = {'left handed': 0, 'right handed': 1}
 
-<<<<<<< HEAD
-education_mapping = {'primary school': 1, 'secondary school': 2,
-                     'college/bachelor degree': 4, 'masters degree': 5}
-=======
 education_mapping = {'primary school': 1, 'secondary school': 2, 'college/bachelor degree': 4, 'masters degree': 5}
->>>>>>> c09117f7f954990e0652cbc5bd513d386de1d513
 
 onlychild_mapping = {'no': 0, 'yes': 1}
 
@@ -181,46 +160,6 @@ def lloyds_kmeans(data, k, iterations):
     return centroids, clusters
 
 
-<<<<<<< HEAD
-# mean of a collection of rows -- for clusters
-def meandata(data):
-    means_and_categorical_modes = []
-    rows = len(data)
-    cols = len(data[0])
-    number_values = ["1", "2", "3", "4", "5"]
-    for col in range(cols):
-        sum = 0
-        frequencies = {}
-        for row in range(rows):
-            # The case for when the data is an integer (139 of the 150 columns)
-            print("TYPE: ", type(data[row][col]))
-            if isinstance(data[row][col], str):
-                if data[row][col] in frequencies:
-                    frequencies[data[row][col]] += 1
-                else:
-                    frequencies[data[row][col]] = 1
-
-            # The case for when the data is categorical (11 of the 150 columns)
-            else:
-                if not math.isnan(data[row][col]):
-                    sum += data[row][col]
-
-        # The case for when the data is an integer (139 of the 150 columns)
-        if sum != 0:
-            print("Sum: ", sum, "and Rows: ", rows)
-            means_and_categorical_modes.append(float(sum) / float(rows))
-        # The case for when the data is categorical (11 of the 150 columns)
-        else:
-            means_and_categorical_modes.append(
-                max(frequencies, key=frequencies.get))
-
-    print("Means method: ")
-    print(means_and_categorical_modes)  # Testing print
-    return means_and_categorical_modes
-
-
-=======
->>>>>>> c09117f7f954990e0652cbc5bd513d386de1d513
 def distance(user1, user2):
     distance = 0
 
@@ -235,12 +174,7 @@ def distance(user1, user2):
         elif user1[x] in alcohol_mapping and user2[x] in alcohol_mapping:
             temp += alcohol_mapping[user1[x]] - alcohol_mapping[user2[x]]
         elif user1[x] in punctuality_mapping and user2[x] in punctuality_mapping:
-<<<<<<< HEAD
-            temp += punctuality_mapping[user1[x]] - \
-                punctuality_mapping[user2[x]]
-=======
             temp += punctuality_mapping[user1[x]] - punctuality_mapping[user2[x]]
->>>>>>> c09117f7f954990e0652cbc5bd513d386de1d513
         elif user1[x] in lying_mapping and user2[x] in lying_mapping:
             temp += lying_mapping[user1[x]] - lying_mapping[user2[x]]
         elif user1[x] in internet_mapping and user2[x] in internet_mapping:
@@ -257,11 +191,7 @@ def distance(user1, user2):
             temp += city_mapping[user1[x]] - city_mapping[user2[x]]
         elif user1[x] in house_mapping and user2[x] in house_mapping:
             temp += house_mapping[user1[x]] - house_mapping[user2[x]]
-<<<<<<< HEAD
-
-=======
     
->>>>>>> c09117f7f954990e0652cbc5bd513d386de1d513
         temp = temp**2
         distance += temp
 
@@ -269,17 +199,4 @@ def distance(user1, user2):
 
     return distance
 
-<<<<<<< HEAD
 # print(distance(dataset.iloc[0], dataset.iloc[1]))
-
-
-# TESTING ZONE!
-
-testdata = dataset.sample(n=20)
-
-print(testdata)
-
-resultclusters = lloyds_kmeans(testdata, 3, 25)
-=======
-# print(distance(dataset.iloc[0], dataset.iloc[1]))
->>>>>>> c09117f7f954990e0652cbc5bd513d386de1d513

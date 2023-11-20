@@ -16,7 +16,11 @@ import matplotlib.pyplot as plt
 
 
 dataset = pd.read_csv("Data/responses.csv")
-# print(dataset.describe())
+#print(dataset["Only child"])
+dataset.drop(dataset.columns[147], axis = 1, inplace = True)
+
+print(dataset.describe())
+
 
 # ignored --
 # dataset_cleaned = dataset.dropna()
@@ -59,7 +63,7 @@ ed_breakdown = dataset['Education'].value_counts()
 # print("Education Value Counts:" + ed_breakdown.to_string())
 
 # Only child
-onlychild_breakdown = dataset['Only child'].value_counts()
+#onlychild_breakdown = dataset['Only child'].value_counts()
 # print("Only Child Value Counts:" + onlychild_breakdown.to_string())
 
 # Village - town
@@ -240,16 +244,67 @@ def distance(user1, user2):
 
     for x in range(len(user1)):
         temp = 0
-        if isinstance(user1[x], np.float64):
-            temp += user1[x] - user2[x]
-        elif isinstance(user1[x], np.int64):
-            temp += user1[x] - user2[x]
+
+        user1val = user1[x]
+        user2val = user2[x]
+        
+        #if x == 150-10:
+         #   temp += user1val/20 - user2val/20
+        #elif x == 150-9:
+         #   temp += user1val/41 - user2val/41
+        #elif x == 150-8:
+         #   temp += user1val/33 - user2val/33
+        #elif x == 150-7:
+         #   temp += user1val/2 - user2val/2
+        #if isinstance(user1val, np.float64) or isinstance(user1val, np.int64) or isinstance(user2val, np.float64) or isinstance(user2val, np.int64):
+        if False: 
+            #print(user1val)
+            #print(user2val)
+            if isinstance(user1val, str) or isinstance(user2val, str):
+                #print("Only children suck")
+                t = 0
+            elif math.isnan(user1val) or math.isnan(user2val):
+                #print("An error has occurred and you're ugly for not inputting a resopnse")
+                t = 0
+            else:
+                tempval = user1val - user2val
+                if tempval > 5:
+                    while(tempval > 5):
+                        tempval = tempval/2
+                temp += tempval
+                #print("Hellppppp")
         else:
             for map in all_mapping:
-                if user1[x] in map and user2[x] in map:
-                    temp += map[user1[x]] - map[user2[x]]
+                if user1val in map and user2val in map:
+                    temp += map[user1val] - map[user2val]
                     break
-        """""
+        temp = temp**2
+        distance += temp
+
+    return distance
+"""
+        if type(user1[x]) == str and type(user1[x]) != type(user2[x]):
+            print("rkelwgjerg")
+            print(x)
+            print(type(user2[x]))
+            print(user1val)
+            print(user2val)
+        if type(user1[x]) != type(user2[x]):
+            user1val = np.float64(user1val)
+            user2val = np.float64(user2val)
+            
+        
+        if x == 150-10:
+            temp += user1val/20 - user2val/20
+        elif x == 150-9:
+            temp += user1val/41 - user2val/41
+        elif x == 150-8:
+            temp += user1val/33 - user2val/33
+        elif x == 150-7:
+            temp += user1val/2 - user2val/2
+            """
+        
+"""""
         
         elif user1[x] in smoking_mapping and user2[x] in smoking_mapping:
             temp += smoking_mapping[user1[x]] - smoking_mapping[user2[x]]
@@ -276,12 +331,44 @@ def distance(user1, user2):
             temp += house_mapping[user1[x]] - house_mapping[user2[x]]
         """""
 
-        temp = temp**2
-        distance += temp
+        
 
     #distance = math.sqrt(distance)
 
-    return distance
+
+def visualization(data):
+    xvalues = list(range(len(data.iloc[0])))  
+    
+    for index in range(len(data)):
+        #print(data.iloc[index])
+            
+        yvalues = []
+        for point in range(len(data.iloc[index])):
+            if isinstance(data.iloc[index][point], np.float64) or isinstance(data.iloc[index][point], np.int64):
+                if point == len(data.iloc[0])-10:
+                    yvalues.append(data.iloc[index][point]/20)
+                elif point == len(data.iloc[0])-9:
+                    yvalues.append(data.iloc[index][point]/41)
+                elif point == len(data.iloc[0])-8:
+                    yvalues.append(data.iloc[index][point]/33)
+                elif point == len(data.iloc[0])-7:
+                    yvalues.append(data.iloc[index][point]/2)
+                else:
+                    yvalues.append(data.iloc[index][point])      
+            else:
+                count = 0
+                for map in all_mapping:
+                    if data.iloc[index][point] in map:
+                        yvalues.append(map[data.iloc[index][point]])
+                        count = 1
+                        break
+                if count != 1:
+                    yvalues.append(yvalues[len(yvalues)-1])
+     
+        #print(index)
+        plt.plot(xvalues, yvalues, alpha = 0.5)
+    plt.title(label = "Visualization of Responses")
+    plt.show()
 
 # print(distance(dataset.iloc[0], dataset.iloc[1]))
 
@@ -289,29 +376,23 @@ def distance(user1, user2):
 # TESTING ZONE!
 
 testdata = dataset
+nodemodata = dataset.iloc[:, :-10]
+
+print("wehgklwejglkwejgklw")
+print(nodemodata)
 
 # print(testdata)
 
-resultclusters = lloyds_kmeans(testdata, 3, 100)
+#resultclusters = lloyds_kmeans(testdata, 3, 100)
 # print(resultclusters)
 
-""" 
-    def visualization(data):
-        xvalues = list(range(len(data)))    
-        
-        for traj in data:
-            
-            yvalues = []
-            for point in range(len(traj)):
-                if isinstance(traj[, np.float64) or isinstance(traj[point], np.int64):
-                    yvalues.append(traj[point])
-                else:
-                    for map in all_mapping:
-                        if traj[point] in map:
-                            yvalues.append(map[traj[point]])
-                            break
-            plt.plot(xvalues, yvalues)
-        plt.title(label = "Visualization of Responses")
-        plt.show()
 
-"""
+
+#print(testdata)
+#visualization(testdata)
+
+totalresults = lloyds_kmeans(dataset, 4, 100)
+
+#print(distance(dataset.iloc[0], dataset.iloc[1]))
+
+nodemoresults = lloyds_kmeans(nodemodata, 4, 100)
