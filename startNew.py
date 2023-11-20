@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import csv
 import math
+import matplotlib.pyplot as plt
 
 # TODO:
 # 1. Descriptive statistics for initial dataset
@@ -18,7 +19,7 @@ dataset = pd.read_csv("Data/responses.csv")
 # print(dataset.describe())
 
 # ignored --
-#dataset_cleaned = dataset.dropna()
+# dataset_cleaned = dataset.dropna()
 # print(dataset_cleaned.describe())
 
 # --------------------------------------------------------------------------------------
@@ -27,23 +28,23 @@ dataset = pd.read_csv("Data/responses.csv")
 
 # Age Breakdown
 age_breakdown = dataset['Age'].value_counts()
-#print("Age Summary Statistics: " + age_breakdown.to_string())
+# print("Age Summary Statistics: " + age_breakdown.to_string())
 
 # Height Breakdown
 height_buckets = pd.cut(dataset['Height'], bins=range(
     145, 210, 5), include_lowest=True)
 height_bucket_counts = height_buckets.value_counts(sort=False)
-#print("Height Bucket Counts:" + height_bucket_counts.to_string())
+# print("Height Bucket Counts:" + height_bucket_counts.to_string())
 
 # Gender Breakdown
 gender_breakdown = dataset['Gender'].value_counts()
-#print("Gender Summary Statistics:" + gender_breakdown.to_string())
+# print("Gender Summary Statistics:" + gender_breakdown.to_string())
 
 # Weight
 weight_buckets = pd.cut(dataset['Weight'], bins=range(
     40, 170, 5), include_lowest=True)
 weight_bucket_counts = weight_buckets.value_counts(sort=False)
-#print("Weight Bucket Counts:" + weight_bucket_counts.to_string())
+# print("Weight Bucket Counts:" + weight_bucket_counts.to_string())
 
 # Number of siblings
 sibs_breakdown = dataset['Number of siblings'].value_counts()
@@ -51,23 +52,23 @@ sibs_breakdown = dataset['Number of siblings'].value_counts()
 
 # Left - right handed
 hand_breakdown = dataset['Left - right handed'].value_counts()
-#print("Left or Right Handed Value Counts:" + hand_breakdown.to_string())
+# print("Left or Right Handed Value Counts:" + hand_breakdown.to_string())
 
 # Education
 ed_breakdown = dataset['Education'].value_counts()
-#print("Education Value Counts:" + ed_breakdown.to_string())
+# print("Education Value Counts:" + ed_breakdown.to_string())
 
 # Only child
 onlychild_breakdown = dataset['Only child'].value_counts()
-#print("Only Child Value Counts:" + onlychild_breakdown.to_string())
+# print("Only Child Value Counts:" + onlychild_breakdown.to_string())
 
 # Village - town
 rural_breakdown = dataset['Village - town'].value_counts()
-#print("Village or Town Value Counts:" + rural_breakdown.to_string())
+# print("Village or Town Value Counts:" + rural_breakdown.to_string())
 
 # House - block of flats'
 house_breakdown = dataset['House - block of flats'].value_counts()
-#print("House or Block of Flats Value Counts:" + house_breakdown.to_string())
+# print("House or Block of Flats Value Counts:" + house_breakdown.to_string())
 
 # Mapping of categorical columns to 1-5 number scales
 smoking_mapping = {'never smoked': 1, 'tried smoking': 2,
@@ -97,6 +98,10 @@ city_mapping = {'village': 0, 'city': 1}
 
 house_mapping = {'block of flats': 0, 'house/bungalow': 1}
 
+all_mapping = [smoking_mapping, alcohol_mapping, punctuality_mapping,
+               lying_mapping, internet_mapping, gender_mapping, handed_mapping,
+               education_mapping, onlychild_mapping, city_mapping, house_mapping]
+
 
 # --------------------------------------------------------------------------------------
 # -----------PART 2: K-MEANS CLUSTERING  -----------------------------------------------
@@ -113,10 +118,13 @@ def lloyds_kmeans(data, k, iterations):
     for i in range(iterations):
         print("Starting iteration " + str(i))
 
+        print("Total distance before cluster reassignment: ",
+              sumdistances(centroids, clusters))
+        clusters = [[] for _ in range(k)]
         # calculate distance from each point to all centroids
         distances = [[0]*len(data) for x in range(k)]
         for centroidindex in range(k):
-            print("Centroid index: " + str(centroidindex))
+            # print("Centroid index: " + str(centroidindex))
             # NEW CODE, centroidindex was i before
             currentcentroid = centroids[centroidindex]
             for rowindex in range(len(data)):
@@ -134,9 +142,16 @@ def lloyds_kmeans(data, k, iterations):
                 if distances[centroidindex][rowindex] < distances[tempmin][rowindex]:
                     tempmin = centroidindex
             clusters[tempmin].append(data.iloc[rowindex])
+        print("Total distance before new centroids: ",
+              sumdistances(centroids, clusters))
 
         # new centroids based on mean of each cluster -- CONNOR
+        # TODO: CASE WHEN CLUSTER NULL
         centroidsnew = [meandata(cluster) for cluster in clusters]
+        print(centroidsnew)
+
+        # REPORT TOTAL DISTANCE OF ALL CLUSTERS
+        print("Total distance: ", sumdistances(centroidsnew, clusters))
 
         # check if new centroids are same as old ones (convergence)
         if np.array_equal(centroids, centroidsnew):  # NEW CODE
@@ -165,7 +180,17 @@ def lloyds_kmeans(data, k, iterations):
     return centroids, clusters
 
 
+def sumdistances(centroids, clusters):
+    tempsum = 0
+    for centerindex in range(len(centroids)):
+        for pointindex in range(len(clusters[centerindex])):
+            tempsum += distance(centroids[centerindex],
+                                clusters[centerindex][pointindex])
+    return tempsum
+
 # mean of a collection of rows -- for clusters
+
+
 def meandata(data):
     means_and_categorical_modes = []
     rows = len(data)
@@ -174,14 +199,14 @@ def meandata(data):
         sum = 0
         frequencies = {}
         for row in range(rows):
-            # The case for when the data is an integer (139 of the 150 columns)
+            # The case for when the data is categorical (11 of the 150 columns)
             if isinstance(data[row][col], str):
                 if data[row][col] in frequencies:
                     frequencies[data[row][col]] += 1
                 else:
                     frequencies[data[row][col]] = 1
 
-            # The case for when the data is categorical (11 of the 150 columns)
+            # The case for when the data is an integer (139 of the 150 columns)
             else:
                 if not math.isnan(data[row][col]):
                     sum += data[row][col]
@@ -189,11 +214,20 @@ def meandata(data):
         # The case for when the data is an integer (139 of the 150 columns)
         if sum != 0:
             # print("Sum: ", sum, "and Rows: ", rows)
-            means_and_categorical_modes.append(float(sum) / float(rows))
+            means_and_categorical_modes.append(
+                round(float(sum) / float(rows), 4))
         # The case for when the data is categorical (11 of the 150 columns)
         else:
-            means_and_categorical_modes.append(
-                max(frequencies, key=frequencies.get))
+            tempmax = 0
+            tempkey = ""
+            for freq in frequencies:
+                if frequencies[freq] > tempmax:
+                    tempmax = frequencies[freq]
+                    tempkey = freq
+            means_and_categorical_modes.append(tempkey)
+
+            # means_and_categorical_modes.append(
+            #   max(frequencies, key=frequencies.get))
 
     # print("Means method: ")
     # print(means_and_categorical_modes)  # Testing print
@@ -210,6 +244,13 @@ def distance(user1, user2):
             temp += user1[x] - user2[x]
         elif isinstance(user1[x], np.int64):
             temp += user1[x] - user2[x]
+        else:
+            for map in all_mapping:
+                if user1[x] in map and user2[x] in map:
+                    temp += map[user1[x]] - map[user2[x]]
+                    break
+        """""
+        
         elif user1[x] in smoking_mapping and user2[x] in smoking_mapping:
             temp += smoking_mapping[user1[x]] - smoking_mapping[user2[x]]
         elif user1[x] in alcohol_mapping and user2[x] in alcohol_mapping:
@@ -233,11 +274,12 @@ def distance(user1, user2):
             temp += city_mapping[user1[x]] - city_mapping[user2[x]]
         elif user1[x] in house_mapping and user2[x] in house_mapping:
             temp += house_mapping[user1[x]] - house_mapping[user2[x]]
+        """""
 
         temp = temp**2
         distance += temp
 
-    distance = math.sqrt(distance)
+    #distance = math.sqrt(distance)
 
     return distance
 
@@ -246,9 +288,30 @@ def distance(user1, user2):
 
 # TESTING ZONE!
 
-testdata = dataset.sample(n=20)
+testdata = dataset
 
-print(testdata)
+# print(testdata)
 
-resultclusters = lloyds_kmeans(testdata, 3, 25)
-print(resultclusters)
+resultclusters = lloyds_kmeans(testdata, 3, 100)
+# print(resultclusters)
+
+""" 
+    def visualization(data):
+        xvalues = list(range(len(data)))    
+        
+        for traj in data:
+            
+            yvalues = []
+            for point in range(len(traj)):
+                if isinstance(traj[, np.float64) or isinstance(traj[point], np.int64):
+                    yvalues.append(traj[point])
+                else:
+                    for map in all_mapping:
+                        if traj[point] in map:
+                            yvalues.append(map[traj[point]])
+                            break
+            plt.plot(xvalues, yvalues)
+        plt.title(label = "Visualization of Responses")
+        plt.show()
+
+"""
