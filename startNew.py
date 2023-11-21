@@ -257,23 +257,19 @@ def distance(user1, user2):
         #elif x == 150-7:
          #   temp += user1val/2 - user2val/2
         #if isinstance(user1val, np.float64) or isinstance(user1val, np.int64) or isinstance(user2val, np.float64) or isinstance(user2val, np.int64):
-        if False: 
+        #if False: 
+        if not isinstance(user1val, str) and not isinstance(user2val, str):
             #print(user1val)
             #print(user2val)
-            if isinstance(user1val, str) or isinstance(user2val, str):
-                #print("Only children suck")
-                t = 0
-            elif math.isnan(user1val) or math.isnan(user2val):
+            if not math.isnan(user1val) and not math.isnan(user2val):
                 #print("An error has occurred and you're ugly for not inputting a resopnse")
-                t = 0
-            else:
                 tempval = user1val - user2val
                 if tempval > 5:
                     while(tempval > 5):
                         tempval = tempval/2
                 temp += tempval
                 #print("Hellppppp")
-        else:
+        elif isinstance(user1val, str) and isinstance(user2val, str):
             for map in all_mapping:
                 if user1val in map and user2val in map:
                     temp += map[user1val] - map[user2val]
@@ -395,4 +391,4 @@ totalresults = lloyds_kmeans(dataset, 4, 100)
 
 #print(distance(dataset.iloc[0], dataset.iloc[1]))
 
-nodemoresults = lloyds_kmeans(nodemodata, 4, 100)
+#nodemoresults = lloyds_kmeans(nodemodata, 4, 100)
