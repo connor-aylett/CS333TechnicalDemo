@@ -106,7 +106,6 @@ all_mapping = [smoking_mapping, alcohol_mapping, punctuality_mapping,
                lying_mapping, internet_mapping, gender_mapping, handed_mapping,
                education_mapping, onlychild_mapping, city_mapping, house_mapping]
 
-
 # --------------------------------------------------------------------------------------
 # -----------PART 2: K-MEANS CLUSTERING  -----------------------------------------------
 # --------------------------------------------------------------------------------------
@@ -146,13 +145,23 @@ def lloyds_kmeans(data, k, iterations):
                 if distances[centroidindex][rowindex] < distances[tempmin][rowindex]:
                     tempmin = centroidindex
             clusters[tempmin].append(data.iloc[rowindex])
+            if len(clusters[tempmin]) == 0:
+                print("Strange error has occurred")
+        testing = sumdistances(centroids, clusters)
+        if testing == 0:
+            print("sdgjkwjeg")
+            print(len(centroids))
+            print(len(clusters))
         print("Total distance before new centroids: ",
-              sumdistances(centroids, clusters))
+              testing)
+        
+        for c in clusters:
+            if len(c) == 0:
+                print("Verification that a cluster is empty")
 
-        # new centroids based on mean of each cluster -- CONNOR
         # TODO: CASE WHEN CLUSTER NULL
         centroidsnew = [meandata(cluster) for cluster in clusters]
-        print(centroidsnew)
+        #print(centroidsnew)
 
         # REPORT TOTAL DISTANCE OF ALL CLUSTERS
         print("Total distance: ", sumdistances(centroidsnew, clusters))
@@ -173,6 +182,7 @@ def lloyds_kmeans(data, k, iterations):
             distances[centroidindex][rowindex] = distance(
                 currentcentroid, currentpoint)
 
+    clusters = [[] for _ in range(k)]
     # assign point to final cluster
     for rowindex in range(len(data)):
         tempmin = 0
@@ -188,8 +198,9 @@ def sumdistances(centroids, clusters):
     tempsum = 0
     for centerindex in range(len(centroids)):
         for pointindex in range(len(clusters[centerindex])):
-            tempsum += distance(centroids[centerindex],
+            test = distance(centroids[centerindex],
                                 clusters[centerindex][pointindex])
+            tempsum += test
     return tempsum
 
 # mean of a collection of rows -- for clusters
@@ -235,6 +246,11 @@ def meandata(data):
 
     # print("Means method: ")
     # print(means_and_categorical_modes)  # Testing print
+    if len(means_and_categorical_modes) == 0:
+        print("centroid is empty")
+        print("DATAAAAAA:\n")
+        print(data)
+
     return means_and_categorical_modes
 
 
@@ -387,8 +403,79 @@ print(nodemodata)
 #print(testdata)
 #visualization(testdata)
 
-totalresults = lloyds_kmeans(dataset, 4, 100)
+totalresults = lloyds_kmeans(dataset, 4, 10)
+#This was me just testing
+print(type(totalresults))
+print(len(totalresults))
+print("Size of cluster 1: ", len(totalresults[1][0]))
+print("Size of cluster 2: ", len(totalresults[1][1]))
+print("Size of cluster 3: ", len(totalresults[1][2]))
+print("Size of cluster 4: ", len(totalresults[1][3]))
+print("Cluster Type: ", type(totalresults[1][0]))
+print("Rows: ", len(totalresults[1][0]), "Cols: ", len(totalresults[1][0][0]))
 
 #print(distance(dataset.iloc[0], dataset.iloc[1]))
 
 #nodemoresults = lloyds_kmeans(nodemodata, 4, 100)
+
+##SUMMARY STATISTICS 
+def summaryStats(cluster):
+    #Needed to hardcode columns for different demographics. i.e. 140 is age
+
+    # Age Breakdown
+    age_column = pd.Series([row[140] for row in cluster])
+    age_breakdown = age_column.value_counts()
+    print("Age Summary Statistics:\n" + age_breakdown.to_string())
+
+    # Height Breakdown
+    height_column = pd.Series([row[141] for row in cluster])
+    height_buckets = pd.cut(height_column, bins=range(
+        145, 210, 5), include_lowest=True)
+    height_bucket_counts = height_buckets.value_counts()
+    print("Height Bucket Counts:\n" + height_bucket_counts.to_string())
+
+    # Gender Breakdown
+    gender_column = pd.Series([row[144] for row in cluster])
+    gender_breakdown = gender_column.value_counts()
+    print("Gender Summary Statistics:\n" + gender_breakdown.to_string())
+
+    # Weight
+    weight_column = pd.Series([row[142] for row in cluster])
+    weight_buckets = pd.cut(weight_column, bins=range(
+        40, 170, 5), include_lowest=True)
+    weight_bucket_counts = weight_buckets.value_counts()
+    print("Weight Bucket Counts:\n" + weight_bucket_counts.to_string())
+
+    # Number of siblings
+    sibs_column = pd.Series([row[143] for row in cluster])
+    sibs_breakdown = sibs_column.value_counts()
+    print("Sibling # Value Counts:\n" + sibs_breakdown.to_string())
+
+    # Left - right handed
+    hand_column = pd.Series([row[145] for row in cluster])
+    hand_breakdown = hand_column.value_counts()
+    print("Left or Right Handed Value Counts:\n" + hand_breakdown.to_string())
+
+    # Education
+    ed_column = pd.Series([row[146] for row in cluster])
+    ed_breakdown = ed_column.value_counts()
+    print("Education Value Counts:\n" + ed_breakdown.to_string())
+
+    # Village - town
+    rural_column = pd.Series([row[147] for row in cluster])
+    rural_breakdown = rural_column.value_counts()
+    print("Village or Town Value Counts:\n" + rural_breakdown.to_string())
+
+    # House - block of flats'
+    house_column = pd.Series([row[148] for row in cluster])
+    house_breakdown = house_column.value_counts()
+    print("House or Block of Flats Value Counts:\n" + house_breakdown.to_string())
+
+print("Summary Stats for Cluster 1: \n")
+summaryStats(totalresults[1][0])
+print("\nSummary Stats for Cluster 2: \n")
+summaryStats(totalresults[1][1])
+print("\nSummary Stats for Cluster 3: \n")
+summaryStats(totalresults[1][2])
+print("\nSummary Stats for Cluster 4: \n")
+summaryStats(totalresults[1][3])
